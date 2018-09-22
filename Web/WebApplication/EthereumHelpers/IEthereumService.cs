@@ -10,8 +10,8 @@ namespace WebApplication.EthereumHelpers
     {
         string AccountAddress { get; set; }
         Task<decimal> GetBalance(string address);
-        Task<string> ReleaseContract(string name, string abi, string byteCode, int gas);
-        Task<string> ReleaseContract(EthereumContractInfo contractInfo, int gas);
+        Task<string> ReleaseContract(string name, string abi, string byteCode, int gas, string inputParameter);
+        Task<string> ReleaseContract(EthereumContractInfo contractInfo, int gas, string inputParameter);
         Task<Contract> GetContract(EthereumContractInfo contractInfo);
     }
 }

@@ -12,26 +12,13 @@ namespace WebApplication.EthereumHelpers
     public class BasicEthereumService : IEthereumService
     {
         private Web3 _web3;
-        private string _accountAddress;
         private string _password;
-
-        public string AccountAddress
-        {
-            get
-            {
-                return _accountAddress;
-            }
-
-            set
-            {
-                _accountAddress = value;
-            }
-        }
+        public string AccountAddress { get; set; }
 
         public BasicEthereumService(IOptions<EthereumSettings> config)
         {
             _web3 = new Web3("http://localhost:7545");
-            _accountAddress = config.Value.EhtereumAccount;
+            AccountAddress = config.Value.EhtereumAccount;
             _password = config.Value.EhtereumPassword;
         }
 
@@ -42,14 +29,14 @@ namespace WebApplication.EthereumHelpers
         }
 
 
-        public async Task<string> ReleaseContract(string name, string abi, string byteCode, int gas)
+        public async Task<string> ReleaseContract(string name, string abi, string byteCode, int gas, string constructorParameter)
         {
             try
             {
-                var resultUnlocking = await _web3.Personal.UnlockAccount.SendRequestAsync(_accountAddress, _password, 60);
+                var resultUnlocking = await _web3.Personal.UnlockAccount.SendRequestAsync(AccountAddress, _password, 60);
                 if (resultUnlocking)
                 {
-                    return await _web3.Eth.DeployContract.SendRequestAsync(abi, byteCode, _accountAddress, new Nethereum.Hex.HexTypes.HexBigInteger(gas), 2);
+                    return await _web3.Eth.DeployContract.SendRequestAsync(abi, byteCode, AccountAddress, new Nethereum.Hex.HexTypes.HexBigInteger(gas), constructorParameter);
                 }
             }
             catch (Exception ex)
@@ -59,14 +46,14 @@ namespace WebApplication.EthereumHelpers
             return "error";
         }
 
-        public async Task<string> ReleaseContract(EthereumContractInfo contractInfo, int gas)
+        public async Task<string> ReleaseContract(EthereumContractInfo contractInfo, int gas, string constructorParameter)
         {
-            return await ReleaseContract(contractInfo.Name, contractInfo.Abi, contractInfo.Bytecode, gas);
+            return await ReleaseContract(contractInfo.Name, contractInfo.Abi, contractInfo.Bytecode, gas, constructorParameter);
         }
 
         public async Task<Contract> GetContract(EthereumContractInfo contractInfo)
         {
-            var resultUnlocking = await _web3.Personal.UnlockAccount.SendRequestAsync(_accountAddress, _password, 60);
+            var resultUnlocking = await _web3.Personal.UnlockAccount.SendRequestAsync(AccountAddress, _password, 60);
             if (resultUnlocking)
             {
                 return _web3.Eth.GetContract(contractInfo.Abi, contractInfo.ContractAddress);

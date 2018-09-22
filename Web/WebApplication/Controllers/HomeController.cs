@@ -75,12 +75,20 @@ namespace WebApplication.Controllers
                 Name = "ContractVerifyer"
             };
 
-            var transactionHash = await _service.ReleaseContract(contractInfo, gas);
+            var transactionHash = await _service.ReleaseContract(contractInfo, gas, fileContent);
 
             Contract contract = await _service.GetContract(contractInfo);
             var function = contract.GetFunction("ValidateFile");
 
-            var isSameFile = function.CallAsync<bool>(fileContent);
+            try
+            {
+                var isSameFile = await function.CallAsync<bool>();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
 
             return RedirectToAction("Index");
         }
