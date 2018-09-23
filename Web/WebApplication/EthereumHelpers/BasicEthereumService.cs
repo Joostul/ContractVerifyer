@@ -15,16 +15,14 @@ namespace WebApplication.EthereumHelpers
         private Web3 _web3;
         private string _password;
         public string AccountAddress { get; set; }
-        private string _storageAccount;
-        private string _storageKey;
+        private string _storageAccountConnectionstring;
 
         public BasicEthereumService(IOptions<EthereumSettings> config)
         {
             _web3 = new Web3("http://localhost:7545");
             AccountAddress = config.Value.EhtereumAccount;
             _password = config.Value.EhtereumPassword;
-            _storageAccount = config.Value.StorageAccount;
-            _storageKey = config.Value.StorageKey;
+            _storageAccountConnectionstring = config.Value.StorageAccountConnectionstring;
         }
 
         public async Task<decimal> GetBalance(string address)
@@ -85,8 +83,7 @@ namespace WebApplication.EthereumHelpers
 
         public async Task SaveContractInfoToTableStorage(EthereumContractInfo contractInfo)
         {
-            StorageCredentials credentials = new StorageCredentials(_storageAccount, _storageKey);
-            CloudStorageAccount account = new CloudStorageAccount(credentials, true);
+            CloudStorageAccount account = CloudStorageAccount.Parse(_storageAccountConnectionstring);
             var client = account.CreateCloudTableClient();
 
             var tableRef = client.GetTableReference("ethtransactions");
@@ -95,10 +92,10 @@ namespace WebApplication.EthereumHelpers
             TableOperation ops = TableOperation.InsertOrMerge(contractInfo);
             await tableRef.ExecuteAsync(ops);
         }
+
         public async Task<EthereumContractInfo> GetContractFromTableStorage(string name)
         {
-            StorageCredentials credentials = new StorageCredentials(_storageAccount, _storageKey);
-            CloudStorageAccount account = new CloudStorageAccount(credentials, true);
+            CloudStorageAccount account = CloudStorageAccount.Parse(_storageAccountConnectionstring);
             var client = account.CreateCloudTableClient();
 
             var tableRef = client.GetTableReference("ethtransactions");

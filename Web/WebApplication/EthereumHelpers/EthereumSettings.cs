@@ -12,8 +12,7 @@ namespace WebApplication.EthereumHelpers
         }
         public string EhtereumAccount { get; set; }
         public string EhtereumPassword { get; set; }
-        public string StorageKey { get; set; }
-        public string StorageAccount { get; set; }
+        public string StorageAccountConnectionstring { get; set; }
 
     }
 }

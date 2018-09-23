@@ -16,14 +16,15 @@ namespace WebApplication.EthereumHelpers
 
         public EthereumContractInfo()
         {
-
         }
 
-        public EthereumContractInfo(string name, string abi, string bytecode, string transactionHash)
+        public EthereumContractInfo(string name, string abi, string bytecode)
         {
+            Name = name;
             Abi = abi;
             Bytecode = bytecode;
-            TransactionHash = transactionHash;
+            PartitionKey = "contract";
+            RowKey = name;
         }
     }
 }

@@ -69,23 +69,13 @@ namespace WebApplication.Controllers
             }
             var fileContent = GetFileContents(file);
 
-            var contractInfo = new EthereumContractInfo()
-            {
-                Abi = abi,
-                Bytecode = byteCode,
-                Name = _contractName
-            };
+            var contractInfo = new EthereumContractInfo(_contractName, abi, byteCode);
 
             contractInfo.TransactionHash = await _service.ReleaseContract(contractInfo, gas, fileContent);
+            await _service.TryGetContractAddress(contractInfo);
             await _service.SaveContractInfoToTableStorage(contractInfo);
 
-            Contract contract = await _service.GetContract(contractInfo);
-
-            var validateFunction = contract.GetFunction("ValidateFile");
-
-            var isValidFile = await validateFunction.CallAsync<bool>(fileContent);
-
-            return RedirectToAction("Index");
+            return View();
         }
 
         [HttpPost]
@@ -100,8 +90,12 @@ namespace WebApplication.Controllers
             var fileContent = GetFileContents(file);
 
             var contractInfo = await _service.GetContractFromTableStorage(_contractName);
+            await _service.TryGetContractAddress(contractInfo);
+            Contract contract = await _service.GetContract(contractInfo);
+            var validateFunction = contract.GetFunction("ValidateFile");
+            var isValidFile = await validateFunction.CallAsync<bool>(fileContent);
+            ViewBag.Message = $"File is valid: {isValidFile}";
 
-            //ViewBag.Message = isValidFile;
             return View();
 
         }
