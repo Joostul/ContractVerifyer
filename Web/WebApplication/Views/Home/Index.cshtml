@@ -2,14 +2,14 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="row">
 
+<div class="row">
     <div class="col-md-3">
         <form enctype="multipart/form-data" asp-action="ImportContract">
             <div class="form-horizontal">
                 <div class="form-group">
-                    <label class="col-md-2 control-label">Import file</label>
-                    <div class="col-md-10">
+                    <label class="col-md-6 control-label">Import file</label>
+                    <div class="col-md-6">
                         <input type="file" class="form-control-file" name="file" />
                     </div>
                 </div>
@@ -21,4 +21,29 @@
             </div>
         </form>
     </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <form enctype="multipart/form-data" asp-action="ValidateContract">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-md-6 control-label">Import file</label>
+                    <div class="col-md-6">
+                        <input type="file" class="form-control-file" name="file" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Import" class="btn btn-default" />
+                </div>
+            </div>
+        </form>
     </div>
+    <div class="col-md-3">
+        <p>
+            @ViewData["Message"]
+        </p>
+    </div>
+</div>

@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Nethereum.Contracts;
 using Nethereum.Web3;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WebApplication.EthereumHelpers
@@ -57,6 +58,24 @@ namespace WebApplication.EthereumHelpers
             if (resultUnlocking)
             {
                 return _web3.Eth.GetContract(contractInfo.Abi, contractInfo.ContractAddress);
+            }
+            return null;
+        }
+
+        public async Task<EthereumContractInfo> TryGetContractAddress(EthereumContractInfo contractInfo)
+        {
+            var resultUnlocking = await _web3.Personal.UnlockAccount.SendRequestAsync(AccountAddress, _password, 60);
+            if (resultUnlocking)
+            {
+                var receipt = await _web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(contractInfo.TransactionHash);
+
+                while (receipt == null)
+                {
+                    Thread.Sleep(5000);
+                    receipt = await _web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(contractInfo.TransactionHash);
+                }
+                contractInfo.ContractAddress = receipt.ContractAddress;
+                return contractInfo;
             }
             return null;
         }
