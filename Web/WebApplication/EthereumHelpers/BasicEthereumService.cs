@@ -15,12 +15,16 @@ namespace WebApplication.EthereumHelpers
         private Web3 _web3;
         private string _password;
         public string AccountAddress { get; set; }
+        private string _storageAccount;
+        private string _storageKey;
 
         public BasicEthereumService(IOptions<EthereumSettings> config)
         {
             _web3 = new Web3("http://localhost:7545");
             AccountAddress = config.Value.EhtereumAccount;
             _password = config.Value.EhtereumPassword;
+            _storageAccount = config.Value.StorageAccount;
+            _storageKey = config.Value.StorageKey;
         }
 
         public async Task<decimal> GetBalance(string address)
@@ -28,7 +32,6 @@ namespace WebApplication.EthereumHelpers
             var balance = await _web3.Eth.GetBalance.SendRequestAsync(address);
             return Web3.Convert.FromWei(balance.Value, 18);
         }
-
 
         public async Task<string> ReleaseContract(string name, string abi, string byteCode, int gas, string constructorParameter)
         {
@@ -78,6 +81,35 @@ namespace WebApplication.EthereumHelpers
                 return contractInfo;
             }
             return null;
+        }
+
+        public async Task SaveContractInfoToTableStorage(EthereumContractInfo contractInfo)
+        {
+            StorageCredentials credentials = new StorageCredentials(_storageAccount, _storageKey);
+            CloudStorageAccount account = new CloudStorageAccount(credentials, true);
+            var client = account.CreateCloudTableClient();
+
+            var tableRef = client.GetTableReference("ethtransactions");
+            await tableRef.CreateIfNotExistsAsync();
+
+            TableOperation ops = TableOperation.InsertOrMerge(contractInfo);
+            await tableRef.ExecuteAsync(ops);
+        }
+        public async Task<EthereumContractInfo> GetContractFromTableStorage(string name)
+        {
+            StorageCredentials credentials = new StorageCredentials(_storageAccount, _storageKey);
+            CloudStorageAccount account = new CloudStorageAccount(credentials, true);
+            var client = account.CreateCloudTableClient();
+
+            var tableRef = client.GetTableReference("ethtransactions");
+            await tableRef.CreateIfNotExistsAsync();
+
+            TableOperation ops = TableOperation.Retrieve<EthereumContractInfo>("contract", name);
+            var tableResult = await tableRef.ExecuteAsync(ops);
+            if (tableResult.HttpStatusCode == 200)
+                return (EthereumContractInfo)tableResult.Result;
+            else
+                return null;
         }
     }
 }

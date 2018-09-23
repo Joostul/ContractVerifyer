@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication.EthereumHelpers
 {
-    public class EthereumContractInfo
+    public class EthereumContractInfo : TableEntity
     {
         public string Name { get; set; }
         public string Abi { get; set; }

@@ -14,5 +14,7 @@ namespace WebApplication.EthereumHelpers
         Task<string> ReleaseContract(EthereumContractInfo contractInfo, int gas, string inputParameter);
         Task<Contract> GetContract(EthereumContractInfo contractInfo);
         Task<EthereumContractInfo> TryGetContractAddress(EthereumContractInfo contractInfo);
+        Task SaveContractInfoToTableStorage(EthereumContractInfo contractInfo);
+        Task<EthereumContractInfo> GetContractFromTableStorage(string name);
     }
 }
