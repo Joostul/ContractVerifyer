@@ -4,25 +4,22 @@
 
 <div class="container">
     <div class="row">
-            <form enctype="multipart/form-data" asp-action="ValidateContract">
-                <div class="form-horizontal">
-                    <div class="form-group">
-                        <label class="col-md-6 control-label">Validate file</label>
-                        <div class="col-md-6">
-                            <input type="file" class="form-control-file" name="file" />
-                        </div>
-                    </div>
-                </div>
+        <form enctype="multipart/form-data" asp-action="ValidateContract">
+            <div class="form">
                 <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Validate" class="btn btn-default" />
+                    <label class="row control-label">Validate file</label>
+                    <div class="row">
+                        <input type="file" class="form-control-file" name="file" />
                     </div>
                 </div>
-            </form>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <input type="submit" value="Validate" class="btn btn-default" />
+                </div>
+            </div>
+        </form>
     </div>
-</div>
-
-<div class="container">
     <div class="row">
         <p class="text-info">
             @ViewBag.Message
