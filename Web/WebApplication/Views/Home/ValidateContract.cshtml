@@ -4,7 +4,6 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-3">
             <form enctype="multipart/form-data" asp-action="ValidateContract">
                 <div class="form-horizontal">
                     <div class="form-group">
@@ -20,13 +19,12 @@
                     </div>
                 </div>
             </form>
-        </div>
     </div>
 </div>
 
 <div class="container">
-    <div class="col-md-3">
-        <p>
+    <div class="row">
+        <p class="text-info">
             @ViewBag.Message
         </p>
     </div>
