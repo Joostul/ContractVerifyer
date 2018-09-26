@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Nethereum.Contracts;
 using Nethereum.Web3;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,7 +51,7 @@ namespace WebApplication.EthereumHelpers
 
         public async Task<string> ReleaseContract(EthereumContractInfo contractInfo, int gas, string constructorParameter)
         {
-            return await ReleaseContract(contractInfo.Name, contractInfo.Abi, contractInfo.Bytecode, gas, constructorParameter);
+            return await ReleaseContract(contractInfo.ContractName, contractInfo.Abi, contractInfo.Bytecode, gas, constructorParameter);
         }
 
         public async Task<Contract> GetContract(EthereumContractInfo contractInfo)
@@ -59,6 +60,16 @@ namespace WebApplication.EthereumHelpers
             if (resultUnlocking)
             {
                 return _web3.Eth.GetContract(contractInfo.Abi, contractInfo.ContractAddress);
+            }
+            return null;
+        }
+
+        public async Task<Contract> GetContract(string abi, string contractAddress)
+        {
+            var resultUnlocking = await _web3.Personal.UnlockAccount.SendRequestAsync(AccountAddress, _password, 60);
+            if (resultUnlocking)
+            {
+                return _web3.Eth.GetContract(abi, contractAddress);
             }
             return null;
         }
@@ -83,6 +94,13 @@ namespace WebApplication.EthereumHelpers
 
         public async Task SaveContractInfoToTableStorage(EthereumContractInfo contractInfo)
         {
+            if (!string.IsNullOrEmpty(contractInfo.ContractAddress))
+            {
+                contractInfo.RowKey = contractInfo.ContractAddress;
+            } else
+            {
+                throw new InvalidOperationException("Can't save a contract without a TransactionHash.");
+            }
             CloudStorageAccount account = CloudStorageAccount.Parse(_storageAccountConnectionstring);
             var client = account.CreateCloudTableClient();
 
@@ -93,7 +111,7 @@ namespace WebApplication.EthereumHelpers
             await tableRef.ExecuteAsync(ops);
         }
 
-        public async Task<EthereumContractInfo> GetContractFromTableStorage(string name)
+        public async Task<EthereumContractInfo> GetContractFromTableStorage(string contractAddress)
         {
             CloudStorageAccount account = CloudStorageAccount.Parse(_storageAccountConnectionstring);
             var client = account.CreateCloudTableClient();
@@ -101,12 +119,26 @@ namespace WebApplication.EthereumHelpers
             var tableRef = client.GetTableReference("ethtransactions");
             await tableRef.CreateIfNotExistsAsync();
 
-            TableOperation ops = TableOperation.Retrieve<EthereumContractInfo>("contract", name);
+            TableOperation ops = TableOperation.Retrieve<EthereumContractInfo>("contracts", contractAddress);
             var tableResult = await tableRef.ExecuteAsync(ops);
             if (tableResult.HttpStatusCode == 200)
                 return (EthereumContractInfo)tableResult.Result;
             else
                 return null;
+        }
+
+        public async Task<List<EthereumContractInfo>> GetContractsFromTableStorageAsync()
+        {
+            CloudStorageAccount account = CloudStorageAccount.Parse(_storageAccountConnectionstring);
+            var client = account.CreateCloudTableClient();
+            var tableRef = client.GetTableReference("ethtransactions");
+            await tableRef.CreateIfNotExistsAsync();
+
+            var retrieveAllQuery = new TableQuery<EthereumContractInfo>();
+            var query = await tableRef.ExecuteQuerySegmentedAsync(retrieveAllQuery, new TableContinuationToken());
+            var contracts = query.Results;
+
+            return contracts;
         }
     }
 }

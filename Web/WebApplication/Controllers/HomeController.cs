@@ -31,7 +31,9 @@ namespace WebApplication.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            ViewBag.Message = TempData["IsValid"];
+            var contracts = _service.GetContractsFromTableStorageAsync().Result;
+            return View(contracts);
         }
 
         public IActionResult About()
@@ -69,17 +71,18 @@ namespace WebApplication.Controllers
             }
             var fileContent = GetFileContents(file);
 
-            var contractInfo = new EthereumContractInfo(_contractName, abi, byteCode);
+            var contractInfo = new EthereumContractInfo(_contractName, abi, byteCode, file.FileName);
 
             contractInfo.TransactionHash = await _service.ReleaseContract(contractInfo, gas, fileContent);
+            contractInfo.RowKey = contractInfo.TransactionHash;
             await _service.TryGetContractAddress(contractInfo);
             await _service.SaveContractInfoToTableStorage(contractInfo);
 
-            return View();
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public async Task<IActionResult> ValidateContract(IFormFile file)
+        public async Task<IActionResult> ValidateContract(IFormFile file, string contractAddress)
         {
             if (file == null || file.Length == 0)
             {
@@ -89,15 +92,17 @@ namespace WebApplication.Controllers
 
             var fileContent = GetFileContents(file);
 
-            var contractInfo = await _service.GetContractFromTableStorage(_contractName);
-            await _service.TryGetContractAddress(contractInfo);
+            var contractInfo = await _service.GetContractFromTableStorage(contractAddress);
+
+            //var contractInfo = await _service.GetContractFromTableStorage(_contractName);
+            //await _service.TryGetContractAddress(contractInfo);
             Contract contract = await _service.GetContract(contractInfo);
             var validateFunction = contract.GetFunction("ValidateFile");
             var isValidFile = await validateFunction.CallAsync<bool>(fileContent);
-            ViewBag.Message = $"File is valid: {isValidFile}";
 
-            return View();
+            TempData["IsValid"] = isValidFile ? $"{file.FileName} the same file as {contractInfo.FileName}." : $"{file.FileName} is not the same file as {contractInfo.FileName}.";
 
+            return RedirectToAction("Index");
         }
 
         private string GetFileContents(IFormFile file)
