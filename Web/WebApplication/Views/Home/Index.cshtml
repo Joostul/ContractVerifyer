@@ -21,7 +21,7 @@
                        style="width:100%">
                     <thead>
                         <tr>
-                            <th>Contract Name</th>
+                            <th>Time created</th>
                             <th>Contract Address</th>
                             <th>File Name</th>
                             <th>Validate File</th>
@@ -36,15 +36,15 @@
                         @foreach (var asset in Model)
                         {
                             <tr>
-                                <td>@asset.ContractName</td>
+                                <td>@asset.Timestamp.ToString("MM/dd/yyyy")</td>
                                 <td>@asset.ContractAddress</td>
                                 <td>@asset.FileName</td>
                                 <td>
                                     <form enctype="multipart/form-data" asp-action="ValidateContract">
                                         <input type="hidden" class="form-control" name="contractAddress" value=@asset.ContractAddress />
                                         <input type="file" class="form-control-file" name="file" />
-                                        <button type="submit" class="btn btn-primary">
-                                            <span class="glyphicon glyphicon-upload"></span>
+                                        <button type="submit" class="btn btn-default">
+                                            <span class="glyphicon glyphicon-ok"></span>
                                             Validate
                                         </button>
                                     </form>

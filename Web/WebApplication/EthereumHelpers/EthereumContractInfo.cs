@@ -26,6 +26,7 @@ namespace WebApplication.EthereumHelpers
             Bytecode = bytecode;
             PartitionKey = "contracts";
             FileName = fileName;
+            Timestamp = DateTime.Now;
         }
     }
 }
