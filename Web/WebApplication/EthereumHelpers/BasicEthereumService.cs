@@ -4,8 +4,12 @@ using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Table;
 using Nethereum.Contracts;
 using Nethereum.Web3;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +21,10 @@ namespace WebApplication.EthereumHelpers
         private string _password;
         public string AccountAddress { get; set; }
         private string _storageAccountConnectionstring;
+
+        private string _directory = Path.Join(Directory.GetCurrentDirectory(), "Save");
+
+        private string _filePath = Path.Join(Directory.GetCurrentDirectory(), "Save", "EthContractInfo.txt");
 
         public BasicEthereumService(IOptions<EthereumSettings> config)
         {
@@ -97,7 +105,8 @@ namespace WebApplication.EthereumHelpers
             if (!string.IsNullOrEmpty(contractInfo.ContractAddress))
             {
                 contractInfo.RowKey = contractInfo.ContractAddress;
-            } else
+            }
+            else
             {
                 throw new InvalidOperationException("Can't save a contract without a TransactionHash.");
             }
@@ -139,6 +148,43 @@ namespace WebApplication.EthereumHelpers
             var contracts = query.Results;
 
             return contracts;
+        }
+
+        public void SaveContractInfoToFile(EthereumContractInfo contractInfo)
+        {
+            if (!Directory.Exists(_directory))
+            {
+                Directory.CreateDirectory(_directory);
+            }
+
+            var currentContracts = GetEthereumContractsFromFile();
+            currentContracts.Add(contractInfo);
+
+            var json = JsonConvert.SerializeObject(currentContracts);
+            File.WriteAllText(_filePath, json);
+        }
+
+        public List<EthereumContractInfo> GetEthereumContractsFromFile()
+        {
+            if (File.Exists(_filePath))
+            {
+                using (var reader = new StreamReader(_filePath))
+                {
+                    string json = reader.ReadToEnd();
+                    var objects = JsonConvert.DeserializeObject<List<EthereumContractInfo>>(json);
+                    return objects;
+                }
+            }
+            else
+            {
+                return new List<EthereumContractInfo>();
+            }
+        }
+
+        public EthereumContractInfo GetContractFromFile(string contractAddress)
+        {
+            var contracts = GetEthereumContractsFromFile();
+            return contracts.Where(e => e.ContractAddress == contractAddress).FirstOrDefault();
         }
     }
 }

@@ -32,7 +32,8 @@ namespace WebApplication.Controllers
         public IActionResult Index()
         {
             ViewBag.Message = TempData["IsValid"];
-            var contracts = _service.GetContractsFromTableStorageAsync().Result;
+            //var contracts = _service.GetContractsFromTableStorageAsync().Result;
+            var contracts = _service.GetEthereumContractsFromFile();
             return View(contracts);
         }
 
@@ -76,7 +77,8 @@ namespace WebApplication.Controllers
             contractInfo.TransactionHash = await _service.ReleaseContract(contractInfo, gas, fileContent);
             contractInfo.RowKey = contractInfo.TransactionHash;
             await _service.TryGetContractAddress(contractInfo);
-            await _service.SaveContractInfoToTableStorage(contractInfo);
+            //await _service.SaveContractInfoToTableStorage(contractInfo);
+            _service.SaveContractInfoToFile(contractInfo);
 
             return RedirectToAction("Index");
         }
@@ -86,13 +88,14 @@ namespace WebApplication.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                ViewData["Message"] = "Not a valid file.";
+                TempData["IsValid"] = "Not a valid file.";
                 return RedirectToAction("Index");
             }
 
             var fileContent = GetFileContents(file);
 
-            var contractInfo = await _service.GetContractFromTableStorage(contractAddress);
+            //var contractInfo = await _service.GetContractFromTableStorage(contractAddress);
+            var contractInfo = _service.GetContractFromFile(contractAddress);
 
             //var contractInfo = await _service.GetContractFromTableStorage(_contractName);
             //await _service.TryGetContractAddress(contractInfo);

@@ -18,5 +18,8 @@ namespace WebApplication.EthereumHelpers
         Task<EthereumContractInfo> GetContractFromTableStorage(string contractAddress);
         Task<List<EthereumContractInfo>> GetContractsFromTableStorageAsync();
         Task<Contract> GetContract(string abi, string contractAddress);
+        void SaveContractInfoToFile(EthereumContractInfo contractInfo);
+        List<EthereumContractInfo> GetEthereumContractsFromFile();
+        EthereumContractInfo GetContractFromFile(string contractAddress);
     }
 }
