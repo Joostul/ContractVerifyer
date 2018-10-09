@@ -171,7 +171,15 @@ namespace WebApplication.EthereumHelpers
                 using (var reader = new StreamReader(_filePath))
                 {
                     string json = reader.ReadToEnd();
-                    var objects = JsonConvert.DeserializeObject<List<EthereumContractInfo>>(json).OrderByDescending(e => e.Timestamp).ToList();
+                    var objects = JsonConvert.DeserializeObject<List<EthereumContractInfo>>(json);
+                    if(objects != null)
+                    {
+                        objects = objects.OrderByDescending(e => e.Timestamp).ToList();
+                    }
+                    else
+                    {
+                        objects = new List<EthereumContractInfo>();
+                    }
                     return objects;
                 }
             }
