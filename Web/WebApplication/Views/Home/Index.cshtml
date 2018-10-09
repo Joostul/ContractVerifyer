@@ -5,10 +5,26 @@
 @model IEnumerable<WebApplication.EthereumHelpers.EthereumContractInfo>
 
 
-@if (!string.IsNullOrWhiteSpace(ViewBag.Message))
+@if (ViewBag.IsValid != null)
 {
-    <div class="alert alert-info alert-dismissable">@ViewBag.Message</div>
+    if (ViewBag.IsValid)
+    {
+        <div class="alert alert-success">@ViewBag.Message</div>
+    }
+    else
+    {
+        <div class="alert alert-danger">@ViewBag.Message</div>
+    }
 }
+else
+{
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Message))
+    {
+        <div class="alert alert-danger">@ViewBag.Message</div>
+    }
+}
+
+
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-primary list-panel" id="list-panel">
@@ -71,7 +87,7 @@
                 <div class="form-group">
                     <label class="row control-label">Create new smart contract</label>
                     <div class="row">
-                        <input type="file" class="form-control-file" name="file"  accept=".docx" />
+                        <input type="file" class="form-control-file" name="file" accept=".docx" />
                     </div>
                 </div>
             </div>

@@ -31,7 +31,8 @@ namespace WebApplication.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.Message = TempData["IsValid"];
+            ViewBag.Message = TempData["Message"];
+            ViewBag.IsValid = TempData["IsValid"];
             //var contracts = _service.GetContractsFromTableStorageAsync().Result;
             var contracts = _service.GetEthereumContractsFromFile();
             return View(contracts);
@@ -67,7 +68,7 @@ namespace WebApplication.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                ViewData["Message"] = "Not a valid file.";
+                TempData["Message"] = "Not a valid file.";
                 return RedirectToAction("Index");
             }
             var fileContent = GetFileContents(file);
@@ -88,7 +89,7 @@ namespace WebApplication.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                TempData["IsValid"] = "Not a valid file.";
+                TempData["Message"] = "Not a valid file.";
                 return RedirectToAction("Index");
             }
 
@@ -103,7 +104,8 @@ namespace WebApplication.Controllers
             var validateFunction = contract.GetFunction("ValidateFile");
             var isValidFile = await validateFunction.CallAsync<bool>(fileContent);
 
-            TempData["IsValid"] = isValidFile ? $"{file.FileName} the same file as {contractInfo.FileName}." : $"{file.FileName} is not the same file as {contractInfo.FileName}.";
+            TempData["Message"] = isValidFile ? $"{file.FileName} the same file as {contractInfo.FileName}." : $"{file.FileName} is not the same file as {contractInfo.FileName}.";
+            TempData["IsValid"] = isValidFile;
 
             return RedirectToAction("Index");
         }
